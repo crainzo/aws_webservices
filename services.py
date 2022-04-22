@@ -14,7 +14,8 @@ def index():
 ''' /listec2 route return the list of all ec2 instance and their id, state, instance_type, ami_id which is on the aws server  '''
 @app.route('/listec2')
 def list_ec2():
-    ec2 = boto3.resource('ec2',region_name='us-east-1')
+    ec2 = boto3.resource('ec2',region_name='us-east-1',aws_access_key_id=os.getenv("ACCESS_ID"),
+         aws_secret_access_key= os.getenv("ACCESS_KEY"))
     instances = ec2.instances.all()
     ec2Instances = []
     
@@ -36,8 +37,10 @@ def list_ec2():
 ''' /lists3 route returns the name of all s3 bucket created on aws server in a list '''
 @app.route('/lists3')
 def list_s3():
-    s3 = boto3.resource('s3',region_name='us-east-1')
+    s3 = boto3.resource('s3',region_name='us-east-1',aws_access_key_id=os.getenv("ACCESS_ID"),
+         aws_secret_access_key= os.getenv("ACCESS_KEY"))
     buckets = s3.buckets.all()
+    print(os.getenv("ACCESS_ID"))
     
     bucketlist = []
     for bucket in buckets:
@@ -59,7 +62,8 @@ def create_s3():
         bucketRegion = bucketData.get('bucketLocation')
 
         try:
-            s3 = boto3.resource('s3',region_name=bucketRegion)
+            s3 = boto3.resource('s3',region_name=bucketRegion,aws_access_key_id=os.getenv("ACCESS_ID"),
+         aws_secret_access_key= os.getenv("ACCESS_KEY"))
             s3.create_bucket(Bucket=bucketName)
         except ClientError as e:
             print(e)
@@ -83,7 +87,8 @@ def createec2():
         InstanceType = ec2Instance.get('InstanceType')
 
 
-        ec2 = boto3.resource('ec2',region_name='us-east-1')
+        ec2 = boto3.resource('ec2',aws_access_key_id=os.getenv("ACCESS_ID"),
+         aws_secret_access_key= os.getenv("ACCESS_KEY"))
         instance = ec2.create_instances(
         ImageId=ImageId,
         MinCount=MinCount,
@@ -96,7 +101,8 @@ def createec2():
 ''' /listdynamodbtable route list all the dynamodb table which is created on aws server'''
 @app.route('/listdynamodbtable')
 def listDynamoDbTable():
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.getenv("ACCESS_ID"),
+         aws_secret_access_key= os.getenv("ACCESS_KEY"))
     dynamodbTable = dynamodb.tables.all()
     tablelist = []
 
@@ -112,7 +118,8 @@ def createDynamoDbTable():
 
     tableData = request.get_json()
 
-    dynamodb = boto3.resource('dynamodb', region_name=tableData.get('region_name'))
+    dynamodb = boto3.resource('dynamodb', region_name=tableData.get('region_name'),aws_access_key_id=os.getenv("ACCESS_ID"),
+         aws_secret_access_key= os.getenv("ACCESS_KEY"))
     print(tableData.get('KeySchema'))
     print(tableData.get('AttributeDefinitions'))
     
@@ -131,7 +138,8 @@ def createDynamoDbTable():
 def deleteDynamoDbTable(table):
    
     try:
-        dynamodb = boto3.resource('dynamodb')
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.getenv("ACCESS_ID"),
+         aws_secret_access_key= os.getenv("ACCESS_KEY"))
         table = dynamodb.Table(table)
         table.delete()
         return ('',204)
